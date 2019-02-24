@@ -12,6 +12,7 @@ import ChameleonFramework
 
 class ToDoListViewController: SwipeTableViewController {
 
+    @IBOutlet weak var searchBar: UISearchBar!
     var todoItems: Results<Item>?
     let realm = try! Realm()
     var selectedCategory: Category? {
@@ -22,8 +23,28 @@ class ToDoListViewController: SwipeTableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let colourhex = selectedCategory?.colour else {fatalError("No colour")}
+            title = selectedCategory?.name
+        updateNavBar(withHexCode: colourhex)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        updateNavBar(withHexCode: "44C9FF")
+    }
+    
+    //MARK: - NAV Bar Setup Methods
+    
+    func updateNavBar(withHexCode colourHexCode: String) {
+        //MARK: - guard let when there is very little chance of a nil occcurence
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation controller does not exist.")}
+        guard let navBarColour = UIColor(hexString: colourHexCode) else {fatalError("hex not a color")}
+        navBar.barTintColor = navBarColour
+        navBar.tintColor = ContrastColorOf(navBarColour, returnFlat: true)
+        navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: ContrastColorOf(navBarColour, returnFlat: true)]
+        searchBar.barTintColor = navBarColour
     }
 
     //MARK: - Tableview Datasource Methods
